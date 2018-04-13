@@ -1,0 +1,317 @@
+package caroclient;
+import java.io.*;
+import javax.swing.*;
+import javax.swing.event.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.net.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import caroclient.CaRoServer;
+
+public class CaRoClient {
+	 public static JFrame f ;
+	    JButton[][] bt ;
+	    static boolean flat = false ;//Kiem tra button click
+	    boolean winner;
+	    JPanel p;
+	    int xx,yy,x,y;
+	    int [][]matran;//danh dau vi tri doi thu danh
+	    int [][]matrandanh;//danh dau vi tri minh danh
+	    Socket socket ;
+	    OutputStream os ;
+	    InputStream is ;
+	    ObjectOutputStream oos ;
+	    ObjectInputStream ios ;
+	    MenuBar menubar ;
+	    public CaRoClient(){
+	        f = new JFrame();
+	        f.setTitle("GameCaro");
+	        f.setSize(700, 500);
+	        x=8;y=8;
+	        f.getContentPane().setLayout(null);
+	        f.getContentPane().setBackground(Color.BLACK);
+	        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	        f.setVisible(true);
+	        f.setResizable(false);
+	        matran = new int[x][y];//ma tran ban co
+	        matrandanh = new int[x][y];//ma tran danh dau vi tri danh
+	        menubar = new MenuBar();
+	        p = new JPanel();
+	        p.setBounds(10, 30, 300, 300);
+	        p.setLayout(new GridLayout(x,y));
+	        f.add(p);
+	        f.setMenuBar(menubar);//tao menubar cho frame
+	        Menu game = new Menu("Game");
+	        menubar.add(game);
+	        MenuItem newItem = new MenuItem("New Game");
+	        game.add(newItem);
+	        MenuItem exit = new MenuItem("Exit");
+	        game.add(exit);
+	        game.addSeparator();
+	        newItem.addActionListener(new ActionListener(){
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	                newgame();
+	                try{
+	                    oos.writeObject("newgame,123");
+	                }catch(IOException ie){
+	                }
+	            }	            
+	        });
+	        exit.addActionListener(new ActionListener(){
+
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	                System.exit(0);
+	            }           
+	        });
+	        ///Game Caro
+	        bt=new JButton[x][y];
+	        for (int i=0;i<x;i++){
+	            for(int j=0;j<y;j++){
+	                final int a=i,b=j;
+	                bt[a][b]= new JButton();//o ban co
+	                bt[a][b].setBackground(Color.RED);
+	                bt[a][b].addActionListener(new ActionListener(){
+
+	                    @Override
+	                    public void actionPerformed(ActionEvent e) {
+	                        flat = true ;//server da click
+	                        matrandanh[a][b]=1;
+	                        bt[a][b].setEnabled(false);
+	                        if(CaRoServer.flat)//neu ben server click
+                                    setEnableButton(false);
+	                        else 
+                                    setEnableButton(true);
+	                        bt[a][b].setIcon(new ImageIcon("D:\\Học Viện Công NGhệ Bưu Chính Viễn Thông TP.HCM\\NĂM 4 HỌC KÌ 2\\LẬP TRÌNH ỨNG DỤNG TRÊN ĐẦU CUỐI DI ĐỘNG\\tick.png"));
+	                        try{
+	                            oos.writeObject("caro,"+a+","+b);
+	                        }catch(IOException ie){
+	                            ie.printStackTrace();
+	                        }
+	                    }
+	                    
+	                });
+	                p.add(bt[a][b]);
+	            }
+	        }
+	        ///main
+	        initMatran();
+	        try{
+	            socket = new Socket("localhost",1234);
+	            System.out.println("Da ket noi toi server!");
+	            os=socket.getOutputStream();
+	            is=socket.getInputStream();
+	            oos= new ObjectOutputStream(os);
+	            ios= new ObjectInputStream(is);
+	            while(true){
+	                String stream = ios.readObject().toString();
+	                String[] data = stream.split(",");
+	                if(data[0].equals("caro")){
+	                    caro(data[1],data[2]);
+	                    if(winner==false)
+	                        setEnableButton(true);
+	                }else if(data[0].equals("newgame")){
+	                    newgame();
+	                }else if(data[0].equals("checkwin")){
+	                }
+	            }
+	        }catch(Exception ie){
+	        }finally{
+	            try {
+	                socket.close();
+	            } catch (IOException ex) {
+	                Logger.getLogger(CaRoClient.class.getName()).log(Level.SEVERE, null, ex);
+	            }
+	        }      
+	    }
+	    public void caro(String x,String y){
+	        xx=Integer.parseInt(x);
+	        yy=Integer.parseInt(y);
+	        //danh dau vi tri danh
+	        matran[xx][yy]=1;
+	        matrandanh[xx][yy]=1;
+	        bt[xx][yy].setEnabled(false);
+	        bt[xx][yy].setIcon(new ImageIcon("D:\\Học Viện Công NGhệ Bưu Chính Viễn Thông TP.HCM\\NĂM 4 HỌC KÌ 2\\LẬP TRÌNH ỨNG DỤNG TRÊN ĐẦU CUỐI DI ĐỘNG\\cross.png"));
+	        //Kiem tra thang hay chua
+	        System.out.println("CheckH:"+checkHang());
+	        System.out.println("CheckC:"+checkCot());
+	        System.out.println("CheckCp:"+checkCheoPhai());
+	        System.out.println("CheckCt:"+checkCheoTrai());
+	        winner = (checkHang()==1||checkCot()==1||checkCheoPhai()==1||checkCheoTrai()==1);
+	        if(checkHang()==1||checkCot()==1||checkCheoPhai()==1||checkCheoTrai()==1){
+	            setEnableButton(false);
+	            try {
+	                oos.writeObject("checkwin,123");
+	            } catch (IOException ex){
+	            }
+	            Object[]options={"Dong y","Huy bo"};
+	            int m=JOptionPane.showConfirmDialog(f,"Ban da thua.Ban co muon choi lai khong?","Thong bao",JOptionPane.YES_NO_OPTION);
+	            if (m==JOptionPane.YES_OPTION){
+	                setVisiblePanel(p);
+	                newgame();
+	                try{
+	                    oos.writeObject("newgame,123");
+	                }catch(IOException ie){
+	                }
+	            }else if(m==JOptionPane.NO_OPTION){
+	            }
+	        }
+	    }
+	    public void newgame(){
+	        for(int i=0;i<x;i++)
+	            for(int j=0;j<y;j++){
+	                bt[i][j].setIcon(null);
+	                matran[i][j]=0;
+	                matrandanh[i][j]=0;
+	            } 
+	            setEnableButton(true);
+	    }
+	    public void setEnableButton(boolean b){
+	        for (int i=0;i<x;i++)
+	            for (int j=0;j<y;j++){
+	                if (matrandanh[i][j]==0)
+			bt[i][j].setEnabled(b);
+		}
+	    }
+	    public void setVisiblePanel(JPanel pHienthi){
+		f.add(pHienthi);
+		pHienthi.setVisible(true);
+		pHienthi.updateUI();//......
+	    }
+	    public void initMatran(){
+		for (int i=0;i<x;i++)
+	            for (int j=0;j<y;j++){
+			matran[i][j]=0;
+		}
+	    }
+	    ///thuat toan tinh thang thua
+	    public int checkHang(){
+		int win=0,hang=0,n=0,k=0;
+		boolean check=false;
+		for (int i=0;i<x;i++){
+	            for (int j=0;j<y;j++){
+			if (check){
+	                    if (matran[i][j]==1){
+				hang++;
+				if (hang>4){
+	                            win=1;
+	                            break;
+				}
+				continue;
+	                    }else {
+				check=false;
+				hang=0;
+	                    }
+			}
+			if (matran[i][j]==1){
+	                    check=true;
+	                    hang++;
+			}else{
+	                    check = false ;
+	                }
+	            }
+	            hang=0; 
+		}
+		return win;
+	    }
+	    public int checkCot(){
+	        int win=0,cot=0;
+		boolean check=false;
+		for (int j=0;j<y;j++){
+	            for (int i=0;i<x;i++){
+			if (check){
+	                    if (matran[i][j]==1){
+				cot++;
+				if (cot>4){
+	                            win=1;
+	                            break;
+				}
+				continue;
+	                    }else {
+	                    check=false;
+	                    cot=0;
+	                    }
+			}
+			if (matran[i][j]==1){
+	                    check=true;
+	                    cot++;
+			}else{
+	                    check = false ;
+	                }
+	            }
+	            cot=0;
+		}
+		return win;
+	    }
+	    public int checkCheoPhai(){
+		int win=0,cheop=0,n=0,k=0;
+		boolean check=false;
+		for (int i=x-1;i>=0;i--){
+	            for (int j=0;j<y;j++){                            
+			if (check){
+	                    if (matran[n-j][j]==1){
+	                        cheop++;
+	                        if(cheop>4){
+	                            win=1;
+	                            break;
+				}
+				continue;
+	                    }else {
+	                    check=false;
+	                    cheop=0;
+	                    }
+			}
+			if (matran[i][j]==1){
+	                    n=i+j;
+	                    check=true;
+	                    cheop++;
+			}else{
+	                    check = false ;
+	                }
+	            }
+	            cheop =0;
+	            check = false ;
+	        }
+	        return win;
+	    }
+	    public int checkCheoTrai(){
+		int win=0,cheot=0,n=0;
+		boolean check=false;
+		for (int i=0;i<x;i++){
+	            for (int j=y-1;j>=0;j--){
+			if (check){
+	                    if (matran[n-j-2*cheot][j]==1){
+				cheot++;
+	                        System.out.print("+"+j);
+	                            if (cheot>4){
+	                            win=1;
+	                            break;
+				}
+				continue;
+	                    }else {
+				check=false;
+				cheot=0;
+	                    }
+			}
+			if (matran[i][j]==1){
+	                    n=i+j;
+	                    check=true;
+	                    cheot++;
+			}else{
+	                    check = false ;
+	                }
+	            }
+	            n=0;
+	            cheot = 0 ;
+	            check = false ;
+	        }
+		return win;
+	    }
+	   
+	    public static void main(String[] args) {
+	        // TODO code application logic here
+	        new CaRoClient();
+	    }
+}
