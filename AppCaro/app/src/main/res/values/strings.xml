@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">CaroClient</string>
+    <string name="toastPlayerExit">Hãy chọn một tên khác</string>
+    <string name="toastPlayerNull">Điền tên</string>
+    <string name="toastReset">Người chơi đã đầu hàng</string>
+    <string name="toastConnectFail">Kết nối không thành công</string>
+    <string name="toastDennie">Người chơi từ chối</string>
+    <string name="toastConnectError">Lỗi kết nối</string>
+    <string name="toastBusy">Người chơi đang bận</string>
+    <string name="toastEndGameError">Thoát game</string>
+    <string name="toastBreakTurn">Mất lượt</string>
+    <string name="toastEndGame">Người chơi đã thoát</string>
+    <string name="toastNoContinue">Người chơi không tiếp tục</string>
+    <string name="strDialogWin">Bạn đã thắng</string>
+    <string name="hintChat">Trò chuyện</string>
+    <string name="strNoConnect">\n</string>
+    <string name="strConnect">\n</string>
+    <string name="strYourTurn">\n</string>
+    <string name="strNoTurn">...\n</string>
+
+</resources>

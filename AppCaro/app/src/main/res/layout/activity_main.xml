@@ -1,0 +1,66 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.nguyenthanhxuan.appcaro.caroclient.MainActivity">
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+        <include
+            android:id="@+id/layoutLCaro"
+            layout="@layout/layout_matrix_caro"
+            android:layout_width="320dp"
+            android:layout_height="320dp"
+            android:visibility="gone"/>
+
+        <include
+            android:id="@+id/layoutLInfo"
+            layout="@layout/layout_player_info"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true" />
+        <include
+            android:id="@+id/layoutLBottom"
+            layout="@layout/input"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="200dp" />
+
+        <LinearLayout
+            android:id="@+id/layoutLePlayer"
+            android:layout_width="170dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/layoutLCaro"
+            android:layout_toRightOf="@+id/layoutLCaro"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:singleLine="true"
+                android:text="Chọn người chơi"
+                android:textSize="20sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@drawable/img_blu" />
+
+            <ListView
+                android:id="@+id/listViewPlayer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:divider="@drawable/img_line"
+                android:fadingEdgeLength="0dp"
+                android:listSelector="@drawable/img_white"
+                android:overScrollMode="never"
+                android:scrollingCache="false"></ListView>
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>

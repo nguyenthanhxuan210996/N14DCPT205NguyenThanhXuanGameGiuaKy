@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="300dp"
+        android:layout_height="270dp"
+        android:background="@drawable/img_gray">
+
+        <GridView
+            android:id="@+id/gridViewCaro"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:fadingEdgeLength="0dp"
+            android:fastScrollEnabled="false"
+            android:horizontalSpacing="1dp"
+            android:listSelector="@drawable/img_empty"
+            android:numColumns="8"
+            android:overScrollMode="never"
+            android:scrollbars="none"
+            android:verticalSpacing="1dp"></GridView>
+    </RelativeLayout>
+</LinearLayout>
